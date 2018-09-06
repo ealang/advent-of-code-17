@@ -1,13 +1,13 @@
 import Text.Printf
 
 rowDiff :: [Int] -> Int
-rowDiff row = abs(minimum row  - maximum row)
+rowDiff row = maximum row - minimum row
 
 evenDiv :: [Int] -> Int
 evenDiv = head . divisors
   where divisors list = [ i `div` j |
                           i <- list, j <- list,
-                          i /= j, i `mod` j == 0 ]
+                          i > j, i `mod` j == 0 ]
 
 day2 :: ([Int] -> Int) -> [[Int]] -> Int
 day2 rowCSum = sum . map rowCSum
