@@ -11,33 +11,32 @@ reverseRange i start length = if (i >= start && i < start + length) ||
   else i
 
 data CSumState = CSumState {
-  i :: Int,
+  index :: Int,
   skip :: Int,
   pos :: Int
 } deriving (Show)
 
 checksumPass :: CSumState -> [Int] -> CSumState
 checksumPass = foldr undoReverse
-  where undoReverse length CSumState { i = i, skip = skip, pos = pos} =
+  where undoReverse length CSumState { index = i, skip = skip, pos = pos} =
           let prevSkip = (skip - 1) `mod` 256
               prevPos = (pos - length - prevSkip) `mod` 256
-          in CSumState { i = reverseRange i prevPos length, skip = prevSkip, pos = prevPos }
+          in CSumState {
+               index = reverseRange i prevPos length,
+               skip = prevSkip,
+               pos = prevPos
+             }
 
 checkSumPasses :: [Int] -> CSumState -> [CSumState]
 checkSumPasses lengths = iterate (`checksumPass` lengths)
 
-checkSumIndex :: Int -> [Int] -> Int -> Int
-checkSumIndex passes lengths i = startIndex
-  where CSumState { i = startIndex, skip = 0, pos = 0 } =
-          head . drop passes $ checkSumPasses lengths endState
+checkSumList :: Int -> [Int] -> [Int]
+checkSumList passes lengths = map checkSumAtIndex [0..255]
+  where checkSumAtIndex i = let endState = CSumState { index = i, skip = endSkip, pos = endPos }
+                            in index $ checkSumPasses lengths endState !! passes
         endSkip = length lengths * passes
         endPos = (sum [0..(length lengths * passes - 1)] +
                   sum lengths * passes) `mod` 256
-        endState = CSumState { i = i, skip = endSkip, pos = endPos }
-
-checkSumList :: Int -> [Int] -> [Int]
-checkSumList passes lengths =
-  map (checkSumIndex passes lengths) [0..255]
 
 checksumStr :: Int -> String -> String
 checksumStr passes str = 
