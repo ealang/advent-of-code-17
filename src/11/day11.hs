@@ -20,31 +20,24 @@ move (x, y) S = (x, y - 2)
 move (x, y) SW = (x - 1, y - 1)
 move (x, y) NW = (x - 1, y + 1)
 
-followDirections :: Coord -> [Direction] -> Coord
-followDirections = foldl move
-
-dirToOrigin :: Coord -> Direction
-dirToOrigin (x, y)
-  | x == 0 && y == 0 = HOLD
-  | x > 0 && y > 0   = SW
-  | x > 0 && y < 0   = NW
-  | x < 0 && y > 0   = SE
-  | x < 0 && y < 0   = NE
-  | y > 0            = S
-  | y < 0            = N
-  | x > 0            = NW
+pathFrom :: Coord -> [Direction] -> [Coord]
+pathFrom = scanl move
 
 distFromOrigin :: Coord -> Int
-distFromOrigin fromPos = length $ takeWhile (/= (0, 0)) positions
-  where positions = iterate moveToOrigin fromPos
-        moveToOrigin pos = move pos (dirToOrigin pos)
-        
+distFromOrigin (x, y) = diag + dx + dy
+  where diag = min (abs x) (abs y)
+        dx = abs x - diag
+        dy = (abs y - diag) `div` 2
+
 part1 :: [Direction] -> Int
-part1 directions = distFromOrigin $ followDirections (0, 0) directions
+part1 = distFromOrigin . last . pathFrom (0, 0)
+
+part2 :: [Direction] -> Int
+part2 directions = maximum $ map distFromOrigin (pathFrom (0, 0) directions)
 
 main = do
   directions <- map parseDirection .
                 splitOn "," .
                 takeWhile (/= '\n') <$> readFile "input.txt"
-
   print $ part1 directions
+  print $ part2 directions
