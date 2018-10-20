@@ -1,8 +1,8 @@
 import Data.List.Split (splitOn)
 
-data Direction = N | NE | SE | S | SW | NW | HOLD deriving (Show)
-
 type Coord = (Int, Int)
+
+data Direction = N | NE | SE | S | SW | NW deriving (Show)
 
 parseDirection :: String -> Direction
 parseDirection "n" = N
